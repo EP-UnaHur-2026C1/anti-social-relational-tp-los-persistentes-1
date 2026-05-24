@@ -1,2 +1,42 @@
 console.log("UnaHur - Anti-Social net");
-//console.log("UnaHur - Anti-Social net");
+
+const express = require('express');
+const app = express();
+
+// Middlewares Globales (SIEMPRE ARRIBA)
+app.use(express.json());
+
+const db = require('../models'); 
+require('dotenv').config();
+
+//const swaggerUi = require('swagger-ui-express');
+//const YAML = require('yamljs');                                               | ??????????????????????????
+//const swaggerDocument = YAML.load('./doc/swagger.yaml');                      | Preguntar si se puede usar
+
+// --- Importación de Rutas ---
+//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+const userRouter = require('./routes/userRoutes');
+// const tagRouter = require('./routes/tagRoutes');
+// const postRoutes = require('./routes/postRoutes');               DESCOMENTAR a FUTURO
+// const commentRoutes = require('./routes/commentRoutes');
+// const followerRoutes = require('./routes/followerRoutes');
+
+// --- Registro de Rutas ---
+app.use('/user', userRouter);
+// app.use('/post', postRoutes);
+// app.use('/tag', tagRouter);                                      DESCOMENTAR a FUTURO
+// app.use('/comment', commentRoutes);
+// app.use('/followers', followerRoutes);
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, async () => {
+    try {
+        await db.sequelize.authenticate();
+        console.log("Conexión a la DB OK");
+    } catch (error) {
+        console.error("Error conectando a la DB:", error);
+    }
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+});
