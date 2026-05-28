@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { User } = require('../../models');
+const { User } = require('../../models'); // importamos el modelo de usuario para validar unicidad de nickName y email en la base de datos
 
 const createUserSchema = Joi.object({
   nickName: Joi.string()
