@@ -17,21 +17,24 @@ require('dotenv').config();
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const userRouter = require('./routes/userRoutes');
-// const tagRouter = require('./routes/tagRoutes');
-// const postRoutes = require('./routes/postRoutes');               DESCOMENTAR a FUTURO
-// const commentRoutes = require('./routes/commentRoutes');
+const tagRouter = require('./routes/tagRoutes');
+const postRoutes = require('./routes/postRoutes');
+const commentRoutes = require('./routes/commentRoutes');
 // const followerRoutes = require('./routes/followerRoutes');
 
 // --- Registro de Rutas ---
 app.use('/user', userRouter);
-// app.use('/post', postRoutes);
-// app.use('/tag', tagRouter);                                      DESCOMENTAR a FUTURO
-// app.use('/comment', commentRoutes);
+app.use('/post', postRoutes);
+app.use('/tag', tagRouter);
+app.use('/comment', commentRoutes);
 // app.use('/followers', followerRoutes);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, async () => {
+app.listen(PORT, async () => { // al iniciar el servidor, se intenta conectar a la base de datos 
+// para verificar que la conexión es exitosa, y se muestra un mensaje en la consola 
+// indicando si la conexión fue exitosa o si hubo un error, y finalmente se muestra 
+// un mensaje indicando que el servidor está corriendo en el puerto especificado
     try {
         await db.sequelize.authenticate();
         console.log("Conexión a la DB OK");

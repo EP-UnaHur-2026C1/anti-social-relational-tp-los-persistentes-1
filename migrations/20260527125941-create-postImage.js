@@ -1,7 +1,7 @@
 'use strict';
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) { // función para crear la tabla PostImages, con idImage como clave primaria autoincremental, idPost como clave foránea que no puede ser nula y referencia a la tabla Posts, y imageUrl como cadena que no puede ser nula
     await queryInterface.createTable('PostImages', {
       idImage: {
         allowNull: false,
@@ -21,14 +21,13 @@ module.exports = {
       },
       imageUrl: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
       }
       
     });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) { // función para eliminar la tabla PostImages
     await queryInterface.dropTable('PostImages');
   }
 };

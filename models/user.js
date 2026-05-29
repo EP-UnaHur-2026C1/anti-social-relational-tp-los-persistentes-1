@@ -3,17 +3,17 @@ const { Model } = require("sequelize");
 module.exports = function(sequelize, DataTypes) {
   class User extends Model {
     static associate(models) {
-      // // 1. Relación 1:M con Post
-      // User.hasMany(models.Post, {
-      //   foreignKey: "idUser",
-      //   as: "posts",
-      // });
+      // 1. Relación 1:M con Post
+      User.hasMany(models.Post, {
+        foreignKey: "idUser",
+        as: "posts",
+      });
 
       // // 2. Relación 1:M con Comment
-      // User.hasMany(models.Comment, {
-      //   foreignKey: "idUser",
-      //   as: "comments",
-      // });
+      User.hasMany(models.Comment, {
+        foreignKey: "idUser",
+        as: "comments",
+      });
 
       // // BONUS:
 
