@@ -1,10 +1,13 @@
 const { Router } = require('express');
 const postControllers = require('../controllers/postControllers'); // importo los controladores de post
+const {
+  validarCreacionPost,
+} = require('../middlewares/validatePost');
 
 const router = Router();
 
 // Crear publicación
-router.post('/', postControllers.crearPublicacion); // ruta para crear una nueva publicación, se espera un JSON con idUser y description en el cuerpo de la solicitud
+router.post('/', validarCreacionPost, postControllers.crearPublicacion); // ruta para crear una nueva publicación, se espera un JSON con idUser y description en el cuerpo de la solicitud
 
 // Obtener publicación por id (incluye imágenes)
 router.get('/:idPost', postControllers.obtenerPost); // ruta para obtener una publicación por su ID, se espera el ID del post como parámetro en la URL, devuelve el post con sus imágenes asociadas y el usuario que lo creó
