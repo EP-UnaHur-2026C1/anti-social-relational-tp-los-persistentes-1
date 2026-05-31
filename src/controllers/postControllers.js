@@ -76,9 +76,74 @@ const eliminarImagen = async (req, res) => {
   }
 };
 
+// obtener todos los posts
+const obtenerTodosLosPosts = async (req, res) => {
+  try {
+    const posts = await Post.findAll({
+      include: [
+        { model: PostImage, as: 'images', attributes: ['idImage', 'imageUrl'] },
+        { model: Comment, as: 'comments', include: [{ model: User, as: 'user', attributes: ['idUser', 'nickName', 'firstName', 'lastName'] }] },
+        { model: Tag, as: 'tags', attributes: ['idTag', 'name'] },
+        { model: User, as: 'user', attributes: ['idUser', 'nickName', 'firstName', 'lastName'] },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+
+    // filtrar comentarios por visibilidad (comentarios creados dentro de los últimos 6 meses)
+    const postsConFiltro = posts.map((post) => {
+      const plainPost = post.toJSON();
+      plainPost.comments = plainPost.comments.filter((comment) => comment.visible);
+      return plainPost;
+    });
+
+    res.status(200).json(postsConFiltro);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener posts', details: error.message });
+  }
+};
+
+// actualizar descripción del post
+const actualizarDescripcionPost = async (req, res) => {
+  try {
+    const { idPost } = req.params;
+    const { description } = req.body;
+
+    if (!description) return res.status(400).json({ message: 'La descripción es requerida' });
+
+    const post = await Post.findByPk(idPost);
+    if (!post) return res.status(404).json({ message: 'Post no encontrado' });
+
+    await post.update({ description });
+    res.status(200).json(post);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar el post', details: error.message });
+  }
+};
+
+// eliminar un post
+const eliminarPost = async (req, res) => {
+  try {
+    const { idPost } = req.params;
+
+    const post = await Post.findByPk(idPost);
+    if (!post) return res.status(404).json({ message: 'Post no encontrado' });
+
+    await post.destroy(); // esto también eliminará las imágenes y comentarios asociados por el CASCADE
+    res.status(200).json({ message: 'Post eliminado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al eliminar el post', details: error.message });
+  }
+};
+
 module.exports = { // exportar las funciones para que puedan ser utilizadas en las rutas
   crearPublicacion,
   obtenerPost,
   agregarImagen,
   eliminarImagen,
+  obtenerTodosLosPosts,
+  actualizarDescripcionPost,
+  eliminarPost,
 };
