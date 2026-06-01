@@ -1,0 +1,158 @@
+{
+  "info": {
+    "_postman_id": "red-social-api-magno",
+    "name": "TP Red Social - API Testing (Magno Dev)",
+    "description": "Colección completa para la evaluación de la API REST con validaciones robustas, relaciones en cascada y manejo de tablas intermedias.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Usuarios",
+      "item": [
+        {
+          "name": "Crear Usuario (magno_dev)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickName\": \"magno_dev\",\n  \"firstName\": \"Magno\",\n  \"lastName\": \"Developer\",\n  \"email\": \"magno@example.com\",\n  \"password\": \"Password123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "http://localhost:3000/user", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["user"] }
+          }
+        },
+        {
+          "name": "Crear Usuario (pepe_tester)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickName\": \"pepe_tester\",\n  \"firstName\": \"Pepe\",\n  \"lastName\": \"Tester\",\n  \"email\": \"pepe@example.com\",\n  \"password\": \"SecurePass789!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "http://localhost:3000/user", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["user"] }
+          }
+        },
+        {
+          "name": "Obtener Todos los Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:3000/user", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["user"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Publicaciones",
+      "item": [
+        {
+          "name": "Crear Post (Magno)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUser\": 1,\n  \"description\": \"Subiendo un post definitivo.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "http://localhost:3000/post", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["post"] }
+          }
+        },
+        {
+          "name": "Obtener Post por ID (Con Comentarios y Tags)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:3000/post/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["post", "1"] }
+          }
+        },
+        {
+          "name": "Eliminar Post (Prueba de Cascada)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "http://localhost:3000/post/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["post", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Comentarios",
+      "item": [
+        {
+          "name": "Crear Comentario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPost\": 1,\n  \"idUser\": 2,\n  \"content\": \"¡Ahora sí!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "http://localhost:3000/comment", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["comment"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Etiquetas (Tags)",
+      "item": [
+        {
+          "name": "Crear Tag",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Backend\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "http://localhost:3000/tag", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["tag"] }
+          }
+        },
+        {
+          "name": "Asignar Tag a Post (MTM)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "http://localhost:3000/tag/post/1/tag/1", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["tag", "post", "1", "tag", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Seguidores (Followers)",
+      "item": [
+        {
+          "name": "Seguir a un Usuario (Pepe sigue a Magno)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idFollower\": 2,\n  \"idFollowing\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "http://localhost:3000/follower", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["follower"] }
+          }
+        },
+        {
+          "name": "Dejar de Seguir (Pepe a Magno)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idFollower\": 2,\n  \"idFollowing\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "http://localhost:3000/follower", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["follower"] }
+          }
+        }
+      ]
+    }
+  ]
+}
