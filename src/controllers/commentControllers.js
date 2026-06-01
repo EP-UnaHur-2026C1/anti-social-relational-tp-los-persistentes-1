@@ -1,52 +1,57 @@
-const { Comment, Post, User } = require('../../models'); // importación de los modelos necesarios para manejar los comentarios, publicaciones y usuarios
+const { Comment, Post, User } = require('../../models'); 
 
+// 1. CREAR UN COMENTARIO
 const crearComentario = async (req, res) => {
   try {
-    const { idPost, idUser, content } = req.body; // obtener el ID del post, el ID del usuario y el contenido del comentario desde el cuerpo de la solicitud
+    const { idPost, idUser, content } = req.body; 
 
     if (!idPost || !idUser || !content) {
-      return res.status(400).json({ message: 'idPost, idUser y content son requeridos' });
+      return res.status(400).json({ errors: ['idPost, idUser y content son requeridos.'] });
     }
 
+    // Buscamos ambos en paralelo para optimizar rendimiento
     const [post, user] = await Promise.all([
       Post.findByPk(idPost),
       User.findByPk(idUser),
     ]);
 
     if (!post) {
-      return res.status(404).json({ message: 'Post no encontrado' });
+      return res.status(404).json({ errors: ['Post no encontrado.'] });
     }
 
     if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      return res.status(404).json({ errors: ['Usuario no encontrado.'] });
     }
 
-    const comentario = await Comment.create({ idPost, idUser, content }); // crear un nuevo comentario asociado al post y al usuario
-    res.status(201).json(comentario);
+    const comentario = await Comment.create({ idPost, idUser, content }); 
+    return res.status(201).json(comentario); 
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear el comentario', details: error.message });
+    console.error(error);
+    return res.status(500).json({ errors: ['Error al crear el comentario.', error.message] });
   }
 };
 
+// 2. OBTENER TODOS LOS COMENTARIOS
 const obtenerComentarios = async (_req, res) => {
   try {
-    const comentarios = await Comment.findAll({ // obtener todos los comentarios, incluyendo el usuario que lo creó y el post al que pertenece, ordenados por fecha de creación descendente
+    const comentarios = await Comment.findAll({ 
       include: [
         { model: User, as: 'user', attributes: ['idUser', 'nickName', 'firstName', 'lastName'] },
         { model: Post, as: 'post', attributes: ['idPost', 'description'] },
       ],
-      order: [['createdAt', 'DESC']], // ordenar por fecha de creación descendente para mostrar los comentarios más recientes primero
+      order: [['createdAt', 'DESC']], 
     });
 
-    res.status(200).json(comentarios);
+    return res.status(200).json(comentarios); 
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener los comentarios', details: error.message });
+    return res.status(500).json({ errors: ['Error al obtener los comentarios.', error.message] });
   }
 };
 
+// 3. OBTENER UN COMENTARIO POR ID
 const obtenerComentario = async (req, res) => {
   try {
-    const { idComment } = req.params; // obtener el ID del comentario desde los parámetros de la URL
+    const { idComment } = req.params; 
     const comentario = await Comment.findByPk(idComment, {
       include: [
         { model: User, as: 'user', attributes: ['idUser', 'nickName', 'firstName', 'lastName'] },
@@ -55,49 +60,52 @@ const obtenerComentario = async (req, res) => {
     });
 
     if (!comentario) {
-      return res.status(404).json({ message: 'Comentario no encontrado' });
+      return res.status(404).json({ errors: ['Comentario no encontrado.'] });
     }
 
-    res.status(200).json(comentario);
+    return res.status(200).json(comentario); 
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el comentario', details: error.message });
+    return res.status(500).json({ errors: ['Error al obtener el comentario.', error.message] });
   }
 };
 
-const actualizarComentario = async (req, res) => { // actualizar el contenido de un comentario existente, se espera el ID del comentario como parámetro en la URL y el nuevo contenido en el cuerpo de la solicitud
+// 4. ACTUALIZAR UN COMENTARIO
+const actualizarComentario = async (req, res) => { 
   try {
     const { idComment } = req.params;
     const { content } = req.body;
 
     if (!content) {
-      return res.status(400).json({ message: 'content es requerido' });
+      return res.status(400).json({ errors: ['content es requerido.'] });
     }
 
     const comentario = await Comment.findByPk(idComment);
     if (!comentario) {
-      return res.status(404).json({ message: 'Comentario no encontrado' });
+      return res.status(404).json({ errors: ['Comentario no encontrado.'] });
     }
 
     await comentario.update({ content });
-    res.status(200).json(comentario);
+    return res.status(200).json(comentario); 
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar el comentario', details: error.message });
+    console.error(error);
+    return res.status(500).json({ errors: ['Error al actualizar el comentario.', error.message] });
   }
 };
 
-const eliminarComentario = async (req, res) => { // eliminar un comentario existente, se espera el ID del comentario como parámetro en la URL
+// 5. ELIMINAR UN COMENTARIO
+const eliminarComentario = async (req, res) => { 
   try {
     const { idComment } = req.params;
-    const comentario = await Comment.findByPk(idComment); // buscar el comentario por su ID para asegurarse de que existe antes de intentar eliminarlo
+    const comentario = await Comment.findByPk(idComment); 
 
     if (!comentario) {
-      return res.status(404).json({ message: 'Comentario no encontrado' });
+      return res.status(404).json({ errors: ['Comentario no encontrado.'] });
     }
 
     await comentario.destroy();
-    res.status(200).json({ message: 'Comentario eliminado correctamente' });
+    return res.status(200).json({ message: 'Comentario eliminado correctamente.' }); 
   } catch (error) {
-    res.status(500).json({ message: 'Error al eliminar el comentario', details: error.message });
+    return res.status(500).json({ errors: ['Error al eliminar el comentario.', error.message] });
   }
 };
 

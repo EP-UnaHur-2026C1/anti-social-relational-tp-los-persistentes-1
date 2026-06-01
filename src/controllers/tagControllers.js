@@ -1,121 +1,139 @@
-const { Tag, Post } = require('../../models'); // importo los modelos necesarios para manejar las relaciones entre tags y posts
+const { Tag, Post } = require('../../models'); 
 
+// 1. CREAR UN TAG
 const crearTag = async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) {
-      return res.status(400).json({ message: 'el nombre es requerido' });
+      return res.status(400).json({ errors: ['El nombre es requerido.'] });
     }
 
-    const tag = await Tag.create({ name }); // crear un nuevo tag con el nombre dado en el cuerpo de la solicitud
-    res.status(201).json(tag);
+    const tag = await Tag.create({ name }); 
+    return res.status(201).json(tag);
   } catch (error) {
-    res.status(500).json({ message: 'Error al crear el tag', details: error.message });
+    console.error(error);
+    return res.status(500).json({ errors: ['Error al crear el tag.', error.message] });
   }
 };
 
+// 2. OBTENER TODOS LOS TAGS
 const obtenerTags = async (_req, res) => {
   try {
-    const tags = await Tag.findAll({ include: [{ model: Post, as: 'posts', attributes: ['idPost', 'description'] }] }); // obtener todos los tags, incluyendo los posts asociados a cada tag, pero solo con los campos idPost y description de cada post
-    res.status(200).json(tags);
+    const tags = await Tag.findAll({ 
+      include: [{ model: Post, as: 'posts', attributes: ['idPost', 'description'] }] 
+    }); 
+    return res.status(200).json(tags);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener los tags', details: error.message });
+    return res.status(500).json({ errors: ['Error al obtener los tags.', error.message] });
   }
 };
 
+// 3. OBTENER UN TAG POR ID
 const obtenerTag = async (req, res) => {
   try {
     const { idTag } = req.params;
-    const tag = await Tag.findByPk(idTag, { // obtener un tag por su ID, incluyendo los posts asociados a ese tag, pero solo con los campos idPost y description de cada post
+    const tag = await Tag.findByPk(idTag, { 
       include: [{ model: Post, as: 'posts', attributes: ['idPost', 'description'] }],
     });
 
     if (!tag) {
-      return res.status(404).json({ message: 'Tag no encontrado' });
+      return res.status(404).json({ errors: ['Tag no encontrado.'] });
     }
 
-    res.status(200).json(tag);
+    return res.status(200).json(tag);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener el tag', details: error.message });
+    return res.status(500).json({ errors: ['Error al obtener el tag.', error.message] });
   }
 };
 
+// 4. ACTUALIZAR UN TAG
 const actualizarTag = async (req, res) => {
   try {
     const { idTag } = req.params;
     const { name } = req.body;
 
     if (!name) {
-      return res.status(400).json({ message: 'el nombre es requerido' });
+      return res.status(400).json({ errors: ['El nombre es requerido.'] });
     }
 
-    const tag = await Tag.findByPk(idTag); // buscar el tag por su ID para asegurarse de que existe antes de intentar actualizarlo
+    const tag = await Tag.findByPk(idTag); 
     if (!tag) {
-      return res.status(404).json({ message: 'Tag no encontrado' });
+      return res.status(404).json({ errors: ['Tag no encontrado.'] });
     }
 
-    await tag.update({ name }); // actualizar el nombre del tag con el nuevo valor dado en el cuerpo de la solicitud
-    res.status(200).json(tag);
+    await tag.update({ name }); 
+    return res.status(200).json(tag);
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar el tag', details: error.message });
+    console.error(error);
+    return res.status(500).json({ errors: ['Error al actualizar el tag.', error.message] });
   }
 };
 
+// 5. ELIMINAR UN TAG
 const eliminarTag = async (req, res) => {
   try {
     const { idTag } = req.params;
     const tag = await Tag.findByPk(idTag);
 
     if (!tag) {
-      return res.status(404).json({ message: 'Tag no encontrado' });
+      return res.status(404).json({ errors: ['Tag no encontrado.'] });
     }
 
-    await tag.destroy(); // eliminar el tag encontrado por su ID, lo que también eliminará las asociaciones con los posts debido a la relación many to many (MTM) definida en los modelos
-    res.status(200).json({ message: 'Tag eliminado correctamente' });
+    await tag.destroy(); 
+    return res.status(200).json({ message: 'Tag eliminado correctamente.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error al eliminar el tag', details: error.message });
+    return res.status(500).json({ errors: ['Error al eliminar el tag.', error.message] });
   }
 };
 
+// 6. ASIGNAR UN TAG A UN POST (Muchos a Muchos)
 const asignarTagApost = async (req, res) => {
   try {
     const { idPost, idTag } = req.params;
 
-    const [post, tag] = await Promise.all([Post.findByPk(idPost), Tag.findByPk(idTag)]); // buscar el post y el tag por sus respectivos IDs para asegurarse de que ambos existen antes de intentar asignar el tag al post
+    const [post, tag] = await Promise.all([
+      Post.findByPk(idPost), 
+      Tag.findByPk(idTag)
+    ]); 
 
     if (!post) {
-      return res.status(404).json({ message: 'Post no encontrado' });
+      return res.status(404).json({ errors: ['Post no encontrado.'] });
     }
 
     if (!tag) {
-      return res.status(404).json({ message: 'Tag no encontrado' });
+      return res.status(404).json({ errors: ['Tag no encontrado.'] });
     }
 
     await post.addTag(tag);
-    res.status(200).json({ message: 'Tag asignado al post correctamente' });
+    return res.status(200).json({ message: 'Tag asignado al post correctamente.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error al asignar tag al post', details: error.message });
+    console.error(error);
+    return res.status(500).json({ errors: ['Error al asignar tag al post.', error.message] });
   }
 };
 
+// 7. QUITAR UN TAG DE UN POST
 const quitarTagDePost = async (req, res) => {
   try {
     const { idPost, idTag } = req.params;
 
-    const [post, tag] = await Promise.all([Post.findByPk(idPost), Tag.findByPk(idTag)]); // buscar el post y el tag por sus respectivos IDs para asegurarse de que ambos existen antes de intentar quitar el tag del post
+    const [post, tag] = await Promise.all([
+      Post.findByPk(idPost), 
+      Tag.findByPk(idTag)
+    ]); 
 
     if (!post) {
-      return res.status(404).json({ message: 'Post no encontrado' });
+      return res.status(404).json({ errors: ['Post no encontrado.'] });
     }
 
     if (!tag) {
-      return res.status(404).json({ message: 'Tag no encontrado' });
+      return res.status(404).json({ errors: ['Tag no encontrado.'] });
     }
 
-    await post.removeTag(tag); // quitar la asociación entre el post y el tag, lo que no elimina ni el post ni el tag, solo la relación entre ambos en la tabla puente de la relación many to many (MTM)
-    res.status(200).json({ message: 'Tag quitado del post correctamente' });
+    await post.removeTag(tag); 
+    return res.status(200).json({ message: 'Tag quitado del post correctamente.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error al quitar tag del post', details: error.message });
+    return res.status(500).json({ errors: ['Error al quitar tag del post.', error.message] });
   }
 };
 
