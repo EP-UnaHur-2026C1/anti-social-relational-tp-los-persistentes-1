@@ -1,5 +1,4 @@
 const { User } = require('../../models');
-const { UniqueConstraintError } = require('sequelize');
 const ATRIBUTOS_EXCLUIDOS = ['updatedAt']; 
 
 // 1. CREAR USUARIO 
@@ -17,11 +16,12 @@ const crearUsuario = async (req, res) => {
         const usuarioRespuesta = nuevoUsuario.toJSON();
         delete usuarioRespuesta.password;
 
-        res.status(201).json(usuarioRespuesta);
+        // return explícito para despachar la respuesta y cerrar el flujo
+        return res.status(201).json(usuarioRespuesta);
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error interno al crear el usuario.', details: error.message });
+        return res.status(500).json({ errors: ['Error interno al crear el usuario.', error.message] });
     }
 };
 
@@ -31,9 +31,9 @@ const obtenerUsuarios = async (req, res) => {
         const usuarios = await User.findAll({
             attributes: { exclude: ['password', ...ATRIBUTOS_EXCLUIDOS] }
         });
-        res.status(200).json(usuarios);
+        return res.status(200).json(usuarios);
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener la lista de usuarios.', details: error.message });
+        return res.status(500).json({ errors: ['Error al obtener la lista de usuarios.', error.message] });
     }
 };
 
@@ -44,9 +44,9 @@ const obtenerUsuario = async (req, res) => {
         const usuario = await User.findByPk(idUser, { 
             attributes: { exclude: ['password', ...ATRIBUTOS_EXCLUIDOS] } 
         });
-        res.status(200).json(usuario);
+        return res.status(200).json(usuario);
     } catch (error) {
-        res.status(500).json({ message: `Error al obtener el usuario con ID ${idUser}.`, details: error.message });
+        return res.status(500).json({ errors: [`Error al obtener el usuario con ID ${idUser}.`, error.message] });
     }
 };
 
@@ -57,17 +57,17 @@ const actualizarUsuario = async (req, res) => {
 
     try {
         let usuario = await User.findByPk(idUser);
-        delete updateData.idUser;
+        delete updateData.idUser; // Evita que alteren la clave primaria
 
         usuario = await usuario.update(updateData);
         
         const usuarioRespuesta = usuario.toJSON();
         delete usuarioRespuesta.password;
 
-        res.status(200).json(usuarioRespuesta);
+        return res.status(200).json(usuarioRespuesta);
 
     } catch (error) {
-        res.status(500).json({ message: 'Error al actualizar el usuario.', details: error.message });
+        return res.status(500).json({ errors: ['Error al actualizar el usuario.', error.message] });
     }
 };
 
@@ -79,12 +79,11 @@ const eliminarUsuario = async (req, res) => {
             where: { idUser }
         });
 
-        res.status(200).json({ message: `Etiqueta ID: ${idUser} eliminada del post correctamente.` });
+        return res.status(200).json({ message: `Usuario ID: ${idUser} eliminado correctamente.` });
         
     } catch (error) {
-        res.status(500).json({ 
-            message: 'Error al eliminar el usuario. Revise si tiene publicaciones/comentarios asociados.', 
-            error: error.message 
+        return res.status(500).json({ 
+            errors: ['Error al eliminar el usuario. Revise si tiene publicaciones/comentarios asociados.', error.message] 
         });
     }
 };
@@ -95,4 +94,4 @@ module.exports = {
     obtenerUsuario,
     actualizarUsuario,
     eliminarUsuario
-};  
+};

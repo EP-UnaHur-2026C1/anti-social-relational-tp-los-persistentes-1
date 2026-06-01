@@ -9,28 +9,31 @@ module.exports = function(sequelize, DataTypes) {
         as: "posts",
       });
 
-      // // 2. Relación 1:M con Comment
+      // 2. Relación 1:M con Comment
       User.hasMany(models.Comment, {
         foreignKey: "idUser",
         as: "comments",
       });
 
-      // // BONUS:
+      // RELACIÓN AUTORREFERENCIAL DE SEGUIDORES (MUCHOS A MUCHOS)
+      
+      // Usuarios a los que este usuario sigue (Seguidos)
+      User.belongsToMany(models.User, {
+        as: "Seguidos",          // Alias único para los usuarios que sigo
+        through: "Followers",      // Tabla intermedia unificada en SQLite
+        foreignKey: "followerId",  // Clave del usuario que realiza la acción de seguir
+        otherKey: "followingId",   // Clave del usuario que es seguido
+        timestamps: false          // Desactiva la búsqueda de campos createdAt/updatedAt
+      });
 
-      // // Usuario que está siguiendo a otros
-      // User.belongsToMany(models.User, {
-      //   as: "Followings", // Usuarios que sigo
-      //   through: "UserFollowings", // Tabla intermedia
-      //   foreignKey: "followerId", // Yo soy el seguidor
-      //   otherKey: "followingId", // El otro es el seguido
-      // });
-
-      // User.belongsToMany(models.User, {
-      //   as: "Followers", // Usuarios que me siguen
-      //   through: "UserFollowers", // Tabla intermedia
-      //   foreignKey: "followingId", // Yo soy el seguido
-      //   otherKey: "followerId", // El otro es el seguidor
-      // });
+      // Usuarios que siguen a este usuario (Seguidores)
+      User.belongsToMany(models.User, {
+        as: "Seguidores",           // Alias único para los usuarios que me siguen
+        through: "Followers",      // Apunta exactamente a la misma tabla 'Followers'
+        foreignKey: "followingId", // Clave del usuario que es seguido
+        otherKey: "followerId",    // Clave del usuario que realiza la acción de seguir
+        timestamps: false
+      });
     }
   }
 

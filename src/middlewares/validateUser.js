@@ -1,6 +1,7 @@
 const Joi = require('joi');
-const { User } = require('../../models'); // importamos el modelo de usuario para validar unicidad de nickName y email en la base de datos
+const { User } = require('../../models'); 
 
+// 1. ESQUEMA DE CREACIÓN DE USUARIO (CON MIN 6 MÁS ESTRICTO Y SEGURO)
 const createUserSchema = Joi.object({
   nickName: Joi.string()
     .trim()
@@ -41,6 +42,7 @@ const createUserSchema = Joi.object({
     }),
 
   password: Joi.string()
+    .trim() // Añadido para limpiar espacios accidentales antes de medir
     .min(6)
     .max(100)
     .required()
@@ -48,10 +50,11 @@ const createUserSchema = Joi.object({
       'string.min': 'La password debe tener al menos 6 caracteres.',
       'any.required': 'La password es obligatoria.'
     })
-})
+});
 
+// 2. VALIDAR CREACIÓN
 const validarCreacionUsuario = (req, res, next) => {
-  const { error, value } = createUserSchema.validate(req.body,{ abortEarly: false, stripUnknown: true });
+  const { error, value } = createUserSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
 
   if (error) {
     const mensajes = error.details.map((d) => d.message);
@@ -59,9 +62,10 @@ const validarCreacionUsuario = (req, res, next) => {
   }
 
   req.body = value; 
-  next();
+  return next(); 
 };
 
+// 3. VALIDAR UNICIDAD NICKNAME
 const validarUnicidadNickName = async (req, res, next) => {
   const { nickName } = req.body;
 
@@ -74,13 +78,14 @@ const validarUnicidadNickName = async (req, res, next) => {
       return res.status(400).json({ errors: ['El nickName ya está en uso.'] });
     }
 
-    next();
+    return next();
   } catch (err) {
     console.error('Error al validar unicidad:', err);
-    res.status(500).json({ message: 'Error interno al validar usuario.', details: err.message });
+    return res.status(500).json({ errors: ['Error interno al validar usuario.', err.message] });
   }
 };
 
+// 4. VALIDAR UNICIDAD EMAIL
 const validarUnicidadMail = async (req, res, next) => {
   const { email } = req.body;
 
@@ -93,36 +98,36 @@ const validarUnicidadMail = async (req, res, next) => {
       return res.status(400).json({ errors: ['El email ya está en uso.'] });
     }
 
-    next();
+    return next();
   } catch (err) {
     console.error('Error al validar unicidad:', err);
-    res.status(500).json({ message: 'Error interno al validar usuario.', details: err.message });
+    return res.status(500).json({ errors: ['Error interno al validar usuario.', err.message] });
   }
 };
 
-
+// 5. VALIDAR EXISTENCIA DE USUARIO (UNIFICADO AL FORMATO DE ERRORS EN ARRAY)
 const validarUsuarioExiste = async (req, res, next) => {
   const idUser = req.params.idUser || req.body.idUser;
 
   if (!idUser) {
-    return res.status(400).json({ message: 'Falta el idUser en la solicitud.' });
+    return res.status(400).json({ errors: ['Falta el idUser en la solicitud.'] });
   }
 
   try {
     const user = await User.findByPk(idUser);
     if (!user) {
-      return res.status(404).json({ message: `Usuario con ID ${idUser} no encontrado.` });
+      return res.status(404).json({ errors: [`Usuario con ID ${idUser} no encontrado.`] });
     }
-    next();
+    return next();
   } catch (error) {
     console.error('Error en validarUsuarioExiste:', error);
-    res.status(500).json({ message: 'Error verificando existencia del usuario.', error: error.message });
+    return res.status(500).json({ errors: ['Error verificando existencia del usuario.', error.message] });
   }
 };
 
-
+// 6. ESQUEMA DE ACTUALIZACIÓN
 const createUpdateUserSchema = Joi.object({
- nickName: Joi.string()
+  nickName: Joi.string()
     .trim()
     .min(3)
     .max(30)
@@ -131,8 +136,7 @@ const createUpdateUserSchema = Joi.object({
       'string.base': 'El nickName debe ser texto.',
       'string.empty': 'El nickName no puede estar vacío.',
       'string.min': 'El nickName debe tener al menos 3 caracteres.',
-      'string.max': 'El nickName no puede tener más de 30 caracteres.',
-      'any.required': 'El nickName es obligatorio.'
+      'string.max': 'El nickName no puede tener más de 30 caracteres.'
     }),
 
   firstName: Joi.string()
@@ -156,20 +160,22 @@ const createUpdateUserSchema = Joi.object({
     .email()
     .optional()
     .messages({
-      'string.email': 'El email debe tener un formato válido.',
+      'string.email': 'El email debe tener un formato válido.'
     }),
 
   password: Joi.string()
+    .trim()
     .min(6)
     .max(100)
     .optional()
     .messages({
-      'string.min': 'La password debe tener al menos 6 caracteres.',
+      'string.min': 'La password debe tener al menos 6 caracteres.'
     })
-})
+});
 
+// 7. VALIDAR UPDATE
 const validarUpdateUsuario = (req, res, next) => {
-  const { error, value } = createUpdateUserSchema.validate(req.body,{ abortEarly: false, stripUnknown: true });
+  const { error, value } = createUpdateUserSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
 
   if (error) {
     const mensajes = error.details.map((d) => d.message);
@@ -177,62 +183,63 @@ const validarUpdateUsuario = (req, res, next) => {
   }
 
   req.body = value;
-  next();
+  return next();
 };
 
+// 8. VALIDAR EMAIL EN UPDATE
 const validarEmailUpdate = async (req, res, next) => {
-    const { email } = req.body;
+  const { email } = req.body;
 
-    if (typeof email === 'undefined') {
-      return next()
+  if (typeof email === 'undefined') {
+    return next();
+  }
+
+  try {
+    const usuarioExistente = await User.findOne({
+      where: { email }
+    });
+
+    if (usuarioExistente) {
+      return res.status(400).json({ errors: ['El email ya está en uso.'] });
     }
 
-    try {
-        const usuarioExistente = await User.findOne({
-            where: { email }
-        });
-
-        if (usuarioExistente) {
-            return res.status(400).json({ errors: ['El email ya está en uso.'] });
-        }
-
-        next();
-    } catch (err) {
-        console.error('Error al validar unicidad:', err);
-        res.status(500).json({ message: 'Error interno al validar usuario.', details: err.message });
-    }
+    return next();
+  } catch (err) {
+    console.error('Error al validar unicidad:', err);
+    return res.status(500).json({ errors: ['Error interno al validar usuario.', err.message] });
+  }
 };
 
-
+// 9. VALIDAR NICKNAME EN UPDATE
 const validarNickNameUpdate = async (req, res, next) => {
-    const { nickName } = req.body;
+  const { nickName } = req.body;
 
-    if (typeof nickName === 'undefined') {
-        return next();
+  if (typeof nickName === 'undefined') {
+    return next();
+  }
+
+  try {
+    const usuarioExistente = await User.findOne({
+      where: { nickName }
+    });
+
+    if (usuarioExistente) {
+      return res.status(400).json({ errors: ['El nickName ya está en uso.'] });
     }
 
-    try {
-        const usuarioExistente = await User.findOne({
-            where: { nickName }
-        });
-
-        if (usuarioExistente) {
-            return res.status(400).json({ errors: ['El nickName ya está en uso.'] });
-        }
-
-        next();
-    } catch (err) {
-        console.error('Error al validar unicidad:', err);
-        res.status(500).json({ message: 'Error interno al validar usuario.', details: err.message });
-    }
+    return next();
+  } catch (err) {
+    console.error('Error al validar unicidad:', err);
+    return res.status(500).json({ errors: ['Error interno al validar usuario.', err.message] });
+  }
 };
 
 module.exports = {
-    validarCreacionUsuario,
-    validarUnicidadNickName,
-    validarUnicidadMail,
-    validarUsuarioExiste,
-    validarUpdateUsuario,
-    validarEmailUpdate,
-    validarNickNameUpdate
+  validarCreacionUsuario,
+  validarUnicidadNickName,
+  validarUnicidadMail,
+  validarUsuarioExiste,
+  validarUpdateUsuario,
+  validarEmailUpdate,
+  validarNickNameUpdate
 };

@@ -10,36 +10,34 @@ const db = require('../models');
 require('dotenv').config();
 
 //const swaggerUi = require('swagger-ui-express');
-//const YAML = require('yamljs');                                               | ??????????????????????????
-//const swaggerDocument = YAML.load('./doc/swagger.yaml');                      | Preguntar si se puede usar
+//const YAML = require('yamljs'); 
+//const swaggerDocument = YAML.load('./doc/swagger.yaml');
 
 // --- Importación de Rutas ---
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-const userRouter = require('./routes/userRoutes');
-const tagRouter = require('./routes/tagRoutes');
+const userRoutes = require('./routes/userRoutes');
+const tagRoutes = require('./routes/tagRoutes');
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
-// const followerRoutes = require('./routes/followerRoutes');
+const followerRoutes = require('./routes/followerRoutes'); 
 
 // --- Registro de Rutas ---
-app.use('/user', userRouter);
+app.use('/user', userRoutes);
 app.use('/post', postRoutes);
-app.use('/tag', tagRouter);
+app.use('/tag', tagRoutes);
 app.use('/comment', commentRoutes);
-// app.use('/followers', followerRoutes);
+app.use('/followers', followerRoutes); 
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, async () => { // al iniciar el servidor, se intenta conectar a la base de datos 
-// para verificar que la conexión es exitosa, y se muestra un mensaje en la consola 
-// indicando si la conexión fue exitosa o si hubo un error, y finalmente se muestra 
-// un mensaje indicando que el servidor está corriendo en el puerto especificado
+app.listen(PORT, async () => {
     try {
-        await db.sequelize.authenticate();
-        console.log("Conexión a la DB OK");
+// .sync() analiza tus modelos y crea de forma automática las tablas que falten físicamente en SQLite sin borrar tus usuarios actuales
+        await db.sequelize.sync();
+        console.log("Conexión a la DB y sincronización de tablas OK");
     } catch (error) {
-        console.error("Error conectando a la DB:", error);
+        console.error("Error al sincronizar la DB:", error);
     }
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });

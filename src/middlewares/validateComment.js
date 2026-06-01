@@ -64,19 +64,20 @@ const validarCreacionComentario = async (req, res, next) => {
       User.findByPk(value.idUser),
     ]);
 
+    // CORREGIDO: Todo unificado al formato { errors: [...] }
     if (!post) {
-      return res.status(404).json({ message: 'Post no encontrado.' });
+      return res.status(404).json({ errors: ['Post no encontrado.'] });
     }
 
     if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado.' });
+      return res.status(404).json({ errors: ['Usuario no encontrado.'] });
     }
 
     req.body = value;
     next();
   } catch (err) {
     console.error('Error en validarCreacionComentario:', err);
-    res.status(500).json({ message: 'Error interno al validar el comentario.', details: err.message });
+    res.status(500).json({ errors: ['Error interno al validar el comentario.'] });
   }
 };
 
@@ -95,7 +96,22 @@ const validarActualizacionComentario = (req, res, next) => {
   next();
 };
 
+const commentExists = async (req, res, next) => {
+  try {
+    const { idComment } = req.params;
+    const comentario = await Comment.findByPk(idComment);
+    if (!comentario) {
+      return res.status(404).json({ errors: [`Comentario con ID ${idComment} no encontrado.`] });
+    }
+    next();
+  } catch (err) {
+    console.error('Error commentExists:', err);
+    res.status(500).json({ errors: ['Error interno al validar existencia del comentario.'] });
+  }
+};
+
 module.exports = {
   validarCreacionComentario,
   validarActualizacionComentario,
+  commentExists, // Exportado listo para commentRoutes.js
 };
