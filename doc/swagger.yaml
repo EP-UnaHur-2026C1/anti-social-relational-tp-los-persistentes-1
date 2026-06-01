@@ -1,0 +1,814 @@
+openapi: 3.0.3
+info:
+  title: Anti-Social Relational API
+  version: 1.0.0
+  description: Documentacion de la API REST para usuarios, posts, tags, comentarios y seguidores.
+servers:
+  - url: http://localhost:3000
+    description: Servidor local
+
+tags:
+  - name: Users
+  - name: Posts
+  - name: Tags
+  - name: Comments
+  - name: Followers
+
+paths:
+  /user:
+    post:
+      tags: [Users]
+      summary: Crear un usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: Usuario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags: [Users]
+      summary: Obtener todos los usuarios
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /user/{idUser}:
+    get:
+      tags: [Users]
+      summary: Obtener un usuario por ID
+      parameters:
+        - $ref: '#/components/parameters/idUser'
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Users]
+      summary: Actualizar un usuario
+      parameters:
+        - $ref: '#/components/parameters/idUser'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Usuario actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Users]
+      summary: Eliminar un usuario
+      parameters:
+        - $ref: '#/components/parameters/idUser'
+      responses:
+        '200':
+          description: Usuario eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /post:
+    post:
+      tags: [Posts]
+      summary: Crear una publicacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreate'
+      responses:
+        '201':
+          description: Publicacion creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags: [Posts]
+      summary: Obtener todos los posts
+      responses:
+        '200':
+          description: Lista de posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /post/{idPost}:
+    get:
+      tags: [Posts]
+      summary: Obtener un post por ID
+      parameters:
+        - $ref: '#/components/parameters/idPost'
+      responses:
+        '200':
+          description: Post encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Posts]
+      summary: Actualizar descripcion de un post
+      parameters:
+        - $ref: '#/components/parameters/idPost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUpdate'
+      responses:
+        '200':
+          description: Post actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Posts]
+      summary: Eliminar un post
+      parameters:
+        - $ref: '#/components/parameters/idPost'
+      responses:
+        '200':
+          description: Post eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /post/{idPost}/images:
+    post:
+      tags: [Posts]
+      summary: Agregar una imagen a un post
+      parameters:
+        - $ref: '#/components/parameters/idPost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostImageCreate'
+      responses:
+        '201':
+          description: Imagen agregada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostImage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /post/{idPost}/images/{idImage}:
+    delete:
+      tags: [Posts]
+      summary: Eliminar una imagen de un post
+      parameters:
+        - $ref: '#/components/parameters/idPost'
+        - $ref: '#/components/parameters/idImage'
+      responses:
+        '200':
+          description: Imagen eliminada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /tag:
+    post:
+      tags: [Tags]
+      summary: Crear un tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreate'
+      responses:
+        '201':
+          description: Tag creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags: [Tags]
+      summary: Obtener todos los tags
+      responses:
+        '200':
+          description: Lista de tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /tag/{idTag}:
+    get:
+      tags: [Tags]
+      summary: Obtener un tag por ID
+      parameters:
+        - $ref: '#/components/parameters/idTag'
+      responses:
+        '200':
+          description: Tag encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Tags]
+      summary: Actualizar un tag
+      parameters:
+        - $ref: '#/components/parameters/idTag'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreate'
+      responses:
+        '200':
+          description: Tag actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Tags]
+      summary: Eliminar un tag
+      parameters:
+        - $ref: '#/components/parameters/idTag'
+      responses:
+        '200':
+          description: Tag eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /tag/post/{idPost}/tag/{idTag}:
+    post:
+      tags: [Tags]
+      summary: Asignar un tag a un post
+      parameters:
+        - $ref: '#/components/parameters/idPost'
+        - $ref: '#/components/parameters/idTag'
+      responses:
+        '200':
+          description: Tag asignado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Tags]
+      summary: Quitar un tag de un post
+      parameters:
+        - $ref: '#/components/parameters/idPost'
+        - $ref: '#/components/parameters/idTag'
+      responses:
+        '200':
+          description: Tag removido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /comment:
+    post:
+      tags: [Comments]
+      summary: Crear un comentario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreate'
+      responses:
+        '201':
+          description: Comentario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags: [Comments]
+      summary: Obtener todos los comentarios
+      responses:
+        '200':
+          description: Lista de comentarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /comment/{idComment}:
+    get:
+      tags: [Comments]
+      summary: Obtener un comentario por ID
+      parameters:
+        - $ref: '#/components/parameters/idComment'
+      responses:
+        '200':
+          description: Comentario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      tags: [Comments]
+      summary: Actualizar un comentario
+      parameters:
+        - $ref: '#/components/parameters/idComment'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentUpdate'
+      responses:
+        '200':
+          description: Comentario actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags: [Comments]
+      summary: Eliminar un comentario
+      parameters:
+        - $ref: '#/components/parameters/idComment'
+      responses:
+        '200':
+          description: Comentario eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /followers/{followerId}/follow/{followingId}:
+    post:
+      tags: [Followers]
+      summary: Seguir a otro usuario
+      parameters:
+        - $ref: '#/components/parameters/followerId'
+        - $ref: '#/components/parameters/followingId'
+      responses:
+        '201':
+          description: Relacion creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /followers/{followerId}/unfollow/{followingId}:
+    delete:
+      tags: [Followers]
+      summary: Dejar de seguir a otro usuario
+      parameters:
+        - $ref: '#/components/parameters/followerId'
+        - $ref: '#/components/parameters/followingId'
+      responses:
+        '200':
+          description: Relacion eliminada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /followers/{followerId}/followings:
+    get:
+      tags: [Followers]
+      summary: Obtener usuarios seguidos
+      parameters:
+        - $ref: '#/components/parameters/followerId'
+      responses:
+        '200':
+          description: Lista de seguidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /followers/{followerId}/followers:
+    get:
+      tags: [Followers]
+      summary: Obtener seguidores
+      parameters:
+        - $ref: '#/components/parameters/followerId'
+      responses:
+        '200':
+          description: Lista de seguidores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  parameters:
+    idUser:
+      name: idUser
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 1
+    idPost:
+      name: idPost
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 1
+    idTag:
+      name: idTag
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 1
+    idComment:
+      name: idComment
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 1
+    idImage:
+      name: idImage
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 1
+    followerId:
+      name: followerId
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 1
+    followingId:
+      name: followingId
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 2
+  responses:
+    BadRequest:
+      description: Solicitud invalida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflicto en la operacion
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    UserCreate:
+      type: object
+      required: [nickName, firstName, lastName, email, password]
+      properties:
+        nickName:
+          type: string
+          example: santi99
+        firstName:
+          type: string
+          example: Santiago
+        lastName:
+          type: string
+          example: Perez
+        email:
+          type: string
+          format: email
+          example: santi@example.com
+        password:
+          type: string
+          example: Secret123!
+    UserUpdate:
+      type: object
+      properties:
+        nickName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    User:
+      type: object
+      properties:
+        idUser:
+          type: integer
+          example: 1
+        nickName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+    PostCreate:
+      type: object
+      required: [idUser, description]
+      properties:
+        idUser:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: Primera publicacion
+    PostUpdate:
+      type: object
+      required: [description]
+      properties:
+        description:
+          type: string
+          example: Descripcion actualizada
+    Post:
+      type: object
+      properties:
+        idPost:
+          type: integer
+          example: 1
+        idUser:
+          type: integer
+          example: 1
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    PostImageCreate:
+      type: object
+      required: [imageUrl]
+      properties:
+        imageUrl:
+          type: string
+          example: https://example.com/image.jpg
+    PostImage:
+      type: object
+      properties:
+        idImage:
+          type: integer
+          example: 1
+        idPost:
+          type: integer
+          example: 1
+        imageUrl:
+          type: string
+    TagCreate:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          example: tecnologia
+    Tag:
+      type: object
+      properties:
+        idTag:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: tecnologia
+    CommentCreate:
+      type: object
+      required: [idPost, idUser, content]
+      properties:
+        idPost:
+          type: integer
+          example: 1
+        idUser:
+          type: integer
+          example: 1
+        content:
+          type: string
+          example: Buen post
+    CommentUpdate:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          example: Texto editado
+    Comment:
+      type: object
+      properties:
+        idComment:
+          type: integer
+          example: 1
+        idPost:
+          type: integer
+          example: 1
+        idUser:
+          type: integer
+          example: 1
+        content:
+          type: string
+        visible:
+          type: boolean
+    FollowResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        followerId:
+          type: integer
+        followingId:
+          type: integer
+    FollowListResponse:
+      type: object
+      properties:
+        idUser:
+          type: integer
+        nickName:
+          type: string
+        followings:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'

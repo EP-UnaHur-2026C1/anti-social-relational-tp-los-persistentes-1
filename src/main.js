@@ -1,6 +1,9 @@
 console.log("UnaHur - Anti-Social net");
 
 const express = require('express');
+const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
 const app = express();
 
 // Middlewares Globales (SIEMPRE ARRIBA)
@@ -9,11 +12,16 @@ app.use(express.json());
 const db = require('../models'); 
 require('dotenv').config();
 
+const swaggerDocument = YAML.load(path.join(__dirname, '../doc/swagger.yaml'));
+
 const userRoutes = require('./routes/userRoutes');
 const tagRoutes = require('./routes/tagRoutes');
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const followerRoutes = require('./routes/followerRoutes'); 
+
+// --- Swagger UI ---
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // --- Registro de Rutas ---
 app.use('/user', userRoutes);
